@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /buscar/
+Disallow: /carrinho/
+Disallow: /checkout/
+Disallow: /login/
+Disallow: /conta/
+
+Sitemap: https://www.acertosonline.com/sitemap.xml
