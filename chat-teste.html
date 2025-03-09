@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat do Cliente</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        body { 
+            background: #0a0a23; 
+            color: #d0d0d5; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .navbar { 
+            background: #1a1a3d; 
+            border-bottom: 1px solid #2a2a5a; 
+        }
+        .navbar-brand { color: #fff; }
+        .container { 
+            flex: 1; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        #chat { 
+            height: 400px; 
+            overflow-y: auto; 
+            background: #1a1a3d; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); 
+            padding: 10px; 
+            margin-bottom: 15px; 
+            scrollbar-width: thin; 
+            scrollbar-color: #6b6bff rgba(107, 107, 255, 0.2); 
+        }
+        #chat::-webkit-scrollbar, #mensagem::-webkit-scrollbar { 
+            width: 10px; 
+        }
+        #chat::-webkit-scrollbar-track, #mensagem::-webkit-scrollbar-track { 
+            background: rgba(42, 42, 90, 0.5); 
+            border-radius: 8px; 
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3); 
+        }
+        #chat::-webkit-scrollbar-thumb, #mensagem::-webkit-scrollbar-thumb { 
+            background: linear-gradient(45deg, #6b6bff, #5555ff); 
+            border-radius: 8px; 
+            border: 1px solid rgba(107, 107, 255, 0.5); 
+            box-shadow: 0 0 5px rgba(107, 107, 255, 0.7); 
+        }
+        #chat::-webkit-scrollbar-thumb:hover, #mensagem::-webkit-scrollbar-thumb:hover { 
+            background: linear-gradient(45deg, #5555ff, #4444cc); 
+            box-shadow: 0 0 8px rgba(107, 107, 255, 1); 
+        }
+        .mensagem { 
+            margin: 5px 0; 
+            padding: 8px; 
+            border-radius: 5px; 
+            max-width: 70%; 
+            background: rgba(255, 255, 255, 0.1); 
+            color: #fff;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .cliente-msg { 
+            margin-left: auto; 
+        }
+        .cliente-msg b { 
+            color: #6b6bff; 
+        }
+        .suporte-msg { 
+            margin-right: auto; 
+        }
+        .suporte-msg b { 
+            color: #00ff99; 
+        }
+        .timestamp { 
+            font-size: 10px; 
+            color: #8080b3; 
+            display: block; 
+            margin-top: 2px; 
+        }
+        .input-group { margin-top: auto; }
+        #mensagem { 
+            background: #2a2a5a; 
+            color: #d0d0d5; 
+            border: 1px solid #3a3a7a;
+            resize: none;
+            height: 80px;
+            scrollbar-width: thin; 
+            scrollbar-color: #6b6bff rgba(107, 107, 255, 0.2); 
+        }
+        #mensagem::placeholder { 
+            color: #8080b3; 
+        }
+        #mensagem:focus { 
+            background: #2a2a5a; 
+            color: #fff; 
+            border-color: #6b6bff; 
+            box-shadow: none; 
+        }
+        #enviar-btn { 
+            background: #6b6bff; 
+            color: #fff; 
+            border: none; 
+            padding: 5px 10px; 
+            font-size: 12px; 
+        }
+        #enviar-btn:hover { 
+            background: #5555ff; 
+        }
+        #status.online { color: #00ff99; font-weight: bold; }
+        #status.offline { color: #ff4d4d; font-weight: bold; }
+        #char-counter { 
+            font-size: 12px; 
+            color: #8080b3; 
+            margin-top: 5px; 
+        }
+        #typing-indicator { 
+            font-size: 12px; 
+            color: #8080b3; 
+            font-style: italic; 
+            margin: 5px 0; 
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">Chat com Suporte</span>
+            <span class="navbar-text">Seu ID: <span id="cliente-id"></span></span>
+        </div>
+    </nav>
+    <div class="container">
+        <div id="chat"></div>
+        <div id="typing-indicator" style="display: none;">Suporte está digitando...</div>
+        <div class="input-group">
+            <textarea id="mensagem" class="form-control" placeholder="Digite sua mensagem..." maxlength="500"></textarea>
+            <button id="enviar-btn" class="btn" onclick="enviarMensagem()">Enviar</button>
+        </div>
+        <div id="char-counter">0/500</div>
+        <p class="mt-2">Status do Suporte: <span id="status" class="offline">Offline</span></p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js';
+        import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js';
+        import { getDatabase, ref, push, onValue, set, update } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1C3iYQe22zhTP5HVj19atOZLROtba3rw",
+            authDomain: "jogo-do-bicho-421ff.firebaseapp.com",
+            databaseURL: "https://jogo-do-bicho-421ff-default-rtdb.firebaseio.com",
+            projectId: "jogo-do-bicho-421ff",
+            storageBucket: "jogo-do-bicho-421ff.firebasestorage.app",
+            messagingSenderId: "1023919123583",
+            appId: "1:1023919123583:web:b6c561fb121fe54f9e234a",
+            measurementId: "G-BPH150V2SG"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let clienteId = localStorage.getItem('clienteId');
+        const clienteIdDisplay = document.getElementById('cliente-id');
+        const mensagemInput = document.getElementById('mensagem');
+        const charCounter = document.getElementById('char-counter');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        function formatarTimestamp(timestamp) {
+            const data = new Date(timestamp);
+            const dia = String(data.getDate()).padStart(2, '0');
+            const mes = String(data.getMonth() + 1).padStart(2, '0');
+            const ano = data.getFullYear();
+            const horas = String(data.getHours()).padStart(2, '0');
+            const minutos = String(data.getMinutes()).padStart(2, '0');
+            return `${dia}/${mes}/${ano} ${horas}:${minutos}`;
+        }
+
+        function atualizarContador() {
+            const length = mensagemInput.value.length;
+            charCounter.textContent = `${length}/500`;
+        }
+
+        let typingTimeout;
+        function atualizarStatusDigitando(statusRef) {
+            mensagemInput.addEventListener('input', () => {
+                clearTimeout(typingTimeout);
+                update(statusRef, { isTyping: true });
+
+                typingTimeout = setTimeout(() => {
+                    update(statusRef, { isTyping: false });
+                }, 1000); // Para de indicar "digitando" após 1 segundo sem atividade
+            });
+        }
+
+        mensagemInput.addEventListener('input', atualizarContador);
+
+        function inicializarChat(clienteId) {
+            const mensagensRef = ref(db, 'mensagens/' + clienteId);
+            const statusRef = ref(db, 'status/' + clienteId);
+            const adminStatusRef = ref(db, 'status/admin');
+
+            onValue(ref(db, 'status/' + clienteId), (snapshot) => {
+                const clienteData = snapshot.val() || {};
+                const nomeRenomeado = clienteData.nome || clienteId;
+                clienteIdDisplay.textContent = nomeRenomeado;
+            });
+
+            atualizarStatusDigitando(statusRef);
+
+            window.enviarMensagem = function() {
+                const texto = mensagemInput.value.trim();
+                if (texto) {
+                    const novaMensagemRef = push(mensagensRef, {
+                        texto: texto,
+                        de: 'cliente',
+                        timestamp: Date.now()
+                    });
+                    onValue(statusRef, (snapshot) => {
+                        const currentCount = snapshot.val()?.unreadCount || 0;
+                        update(statusRef, { 
+                            unreadCount: currentCount + 1,
+                            isTyping: false // Para o status de digitando ao enviar
+                        });
+                    }, { onlyOnce: true });
+                    mensagemInput.value = '';
+                    atualizarContador();
+
+                    // Verificar se o admin está offline e enviar notificação via Google Apps Script
+                    onValue(ref(db, 'status/admin'), (snapshot) => {
+                        const adminStatus = snapshot.val();
+                        if (!adminStatus?.online) {
+                            fetch('https://script.google.com/macros/s/AKfycbyxAbCh1OvSJnWPc6MkrcBH3A7Ppy9KsQ1ovVEoUmKnn8oxjuuxJpDmYVkJQhNPAhb4mw/exec', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    clienteId: clienteId,
+                                    mensagem: texto
+                                })
+                            })
+                            .then(response => console.log('Solicitação enviada ao Google Apps Script'))
+                            .catch(err => console.error('Erro ao chamar Google Apps Script:', err));
+                        }
+                    }, { onlyOnce: true });
+                }
+            };
+
+            onValue(mensagensRef, (snapshot) => {
+                const mensagens = snapshot.val() || {};
+                const chat = document.getElementById('chat');
+                chat.innerHTML = '';
+                for (let key in mensagens) {
+                    const msg = mensagens[key];
+                    const classe = msg.de === 'cliente' ? 'cliente-msg' : 'suporte-msg';
+                    const timestampFormatado = formatarTimestamp(msg.timestamp);
+                    chat.innerHTML += `<div class="mensagem ${classe}"><b>${msg.de === 'cliente' ? 'Você' : 'Suporte'}:</b> ${msg.texto}<span class="timestamp">${timestampFormatado}</span></div>`;
+                }
+                chat.scrollTop = chat.scrollHeight;
+            });
+
+            update(statusRef, { online: true });
+            window.onunload = () => update(statusRef, { online: false, isTyping: false });
+
+            onValue(adminStatusRef, (snapshot) => {
+                const status = snapshot.val()?.online ? 'Online' : 'Offline';
+                const statusElement = document.getElementById('status');
+                statusElement.textContent = status;
+                statusElement.className = snapshot.val()?.online ? 'online' : 'offline';
+
+                // Mostra o indicador de "Suporte está digitando..."
+                const isTyping = snapshot.val()?.isTyping || false;
+                typingIndicator.style.display = isTyping ? 'block' : 'none';
+                if (isTyping) chat.scrollTop = chat.scrollHeight; // Rola para baixo quando digitando
+            });
+        }
+
+        if (!clienteId) {
+            signInAnonymously(auth).then((user) => {
+                clienteId = user.user.uid;
+                localStorage.setItem('clienteId', clienteId);
+                inicializarChat(clienteId);
+            }).catch((error) => {
+                console.error("Erro na autenticação:", error);
+                alert("Erro ao conectar ao chat: " + error.message);
+            });
+        } else {
+            inicializarChat(clienteId);
+        }
+
+        atualizarContador();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
