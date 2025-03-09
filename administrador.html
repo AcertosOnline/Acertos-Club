@@ -6,10 +6,11 @@
     <title>Painel do Administrador</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-messaging.js"></script>
+    <!-- Firebase Compat (scripts normais, sem módulos) -->
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-messaging-compat.js"></script>
     <style>
         body{background:#0a0a23;color:#d0d0d5;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;min-height:100vh;margin:0;display:flex;flex-direction:column}.navbar{background:#1a1a3d;border-bottom:1px solid #2a2a5a}.navbar-brand{color:#fff}.container-fluid{padding:0 20px}.main-content{flex:1;display:flex;padding:20px;gap:20px}#clientes{background:#1a1a3d;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.3);padding:15px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#6b6bff #1a1a3d}#clientes::-webkit-scrollbar{width:8px}#clientes::-webkit-scrollbar-track{background:#1a1a3d;border-radius:4px}#clientes::-webkit-scrollbar-thumb{background:#6b6bff;border-radius:4px}#clientes::-webkit-scrollbar-thumb:hover{background:#5555ff}#chat-container{flex:1;background:#1a1a3d;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.3);padding:15px;display:flex;flex-direction:column}.chat-header{background:#1a1a3d;padding:10px 0;margin-bottom:10px;border-bottom:1px solid #2a2a5a;position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center}#chat{height:400px;overflow-y:auto;overflow-x:hidden;margin-bottom:15px;scrollbar-width:thin;scrollbar-color:#6b6bff rgba(107,107,255,.2)}#chat::-webkit-scrollbar,#mensagem::-webkit-scrollbar,.editable-textarea::-webkit-scrollbar{width:10px}#chat::-webkit-scrollbar-track,#mensagem::-webkit-scrollbar-track,.editable-textarea::-webkit-scrollbar-track{background:rgba(42,42,90,.5);border-radius:8px;box-shadow:inset 0 0 5px rgba(0,0,0,.3)}#chat::-webkit-scrollbar-thumb,#mensagem::-webkit-scrollbar-thumb,.editable-textarea::-webkit-scrollbar-thumb{background:linear-gradient(45deg,#6b6bff,#5555ff);border-radius:8px;border:1px solid rgba(107,107,255,.5);box-shadow:0 0 5px rgba(107,107,255,.7)}#chat::-webkit-scrollbar-thumb:hover,#mensagem::-webkit-scrollbar-thumb:hover,.editable-textarea::-webkit-scrollbar-thumb:hover{background:linear-gradient(45deg,#5555ff,#4444cc);box-shadow:0 0 8px rgba(107,107,255,1)}.chat-status{font-size:12px}.chat-status.online{color:#00ff99}.chat-status.offline{color:#8080b3}.mensagem{margin-bottom:10px;padding:10px;border-radius:5px;max-width:80%;background:rgba(255,255,255,.1);color:#fff;white-space:pre-wrap;word-wrap:break-word;overflow-wrap:break-word;word-break:break-all}.admin-msg{margin-left:auto}.admin-msg b{color:#6b6bff}.cliente-msg{margin-right:auto}.cliente-msg b{color:#00ff99}.timestamp{font-size:10px;color:#8080b3;display:block;margin-top:2px}.msg-actions{margin-top:5px}.msg-btn,.delete-btn,.rename-btn,.delete-all-btn,#logout-btn,.modal-btn{background:#6b6bff;color:#fff;border:none;padding:5px 10px;font-size:12px}.msg-btn:hover,.delete-btn:hover,.rename-btn:hover,.delete-all-btn:hover,#logout-btn:hover,.modal-btn:hover{background:#5555ff}.msg-btn{background:none;color:#8080b3}.delete-btn{padding:0 5px;background:none}.rename-btn{padding:0 5px;background:none}.delete-all-btn{margin-right:10px}#enviar-btn{background:#6b6bff;color:#fff}#busca-clientes{background:#2a2a5a;color:#d0d0d5;border:1px solid #3a3a7a;margin-bottom:10px}#busca-clientes::placeholder{color:#8080b3}#busca-clientes:focus{background:#2a2a5a;color:#fff;border-color:#6b6bff;box-shadow:none}.cliente{cursor:pointer;padding:8px;border-radius:5px;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between}.cliente:hover{background:#2a2a5a}.cliente-id{max-width:50%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.unread-icon{color:#00ff99;margin-left:5px;font-size:14px}.online{color:#00ff99}.offline{color:#8080b3}.selecionado{background:#6b6bff;color:#fff}.input-group{margin-top:auto}.form-control{background:#2a2a5a;color:#d0d0d5;border:1px solid #3a3a7a}.form-control::placeholder{color:#8080b3}.form-control:focus{background:#2a2a5a;color:#fff;border-color:#6b6bff;box-shadow:none}#mensagem{resize:none;height:80px;scrollbar-width:thin;scrollbar-color:#6b6bff rgba(107,107,255,.2)}.char-count{font-size:12px;color:#8080b3;margin-top:5px}.char-count.warning{color:#ff5555}.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);justify-content:center;align-items:center;z-index:1000}.modal-content{background:#1a1a3d;color:#d0d0d5;border-radius:8px;box-shadow:0 4px 8px rgba(0,0,0,.3);padding:20px;max-width:400px;text-align:center}.modal-input{width:100%;padding:8px;margin:10px 0;background:#2a2a5a;color:#d0d0d5;border:1px solid #3a3a7a;border-radius:4px;resize:vertical;height:80px;scrollbar-width:thin;scrollbar-color:#6b6bff rgba(107,107,255,.2)}.modal-input:focus{border-color:#6b6bff;outline:none}#typing-indicator{font-size:12px;color:#8080b3;font-style:italic;margin:5px 0}#login-screen{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:100vh;background:#0a0a23}#login-container{background:#1a1a3d;padding:30px;border-radius:8px;box-shadow:0 4px 8px rgba(0,0,0,.3);width:100%;max-width:400px}#login-container h2{text-align:center;margin-bottom:20px}#login-error{color:#ff5555;text-align:center;margin-top:10px;display:none}#main-interface{display:none;flex-direction:column;min-height:100vh}.editable-textarea{background:#2a2a5a;color:#d0d0d5;border:1px solid #3a3a7a;border-radius:4px;padding:5px;width:100%;min-height:50px;resize:vertical;scrollbar-width:thin;scrollbar-color:#6b6bff rgba(107,107,255,.2)}.editable-textarea:focus{border-color:#6b6bff;outline:none}@media (max-width:768px){.main-content{flex-direction:column}#clientes{max-height:300px;width:100%}#chat-container{width:100%}.cliente-id{max-width:50%}#login-container{padding:20px}}
     </style>
@@ -69,12 +70,8 @@
             </div>
         </div>
     </div>
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js';
-        import { getDatabase, ref, push, set, onValue, onChildAdded, remove, update } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js';
-        import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-messaging.js';
-
+    <script>
+        // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyA1C3iYQe22zhTP5HVj19atOZLROtba3rw",
             authDomain: "jogo-do-bicho-421ff.firebaseapp.com",
@@ -85,12 +82,15 @@
             appId: "1:1023919123583:web:b6c561fb121fe54f9e234a",
             measurementId: "G-BPH150V2SG"
         };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-        const messaging = getMessaging(app);
+
+        // Inicializar Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth(app);
+        const db = firebase.database(app);
+        const messaging = firebase.messaging(app);
         let clienteSelecionado = null;
 
+        // Funções auxiliares
         const formatarTimestamp = t => new Date(t).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         const escapeJsString = text => text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
 
@@ -113,7 +113,8 @@
             document.getElementById('modal-input').value = dv || '';
         };
 
-        onAuthStateChanged(auth, user => {
+        // Autenticação
+        auth.onAuthStateChanged(user => {
             const ls = document.getElementById('login-screen');
             const mi = document.getElementById('main-interface');
             const ps = document.getElementById('push-subscription');
@@ -127,15 +128,15 @@
 
                 // Verificar se já está inscrito
                 const uid = user.uid;
-                onValue(ref(db, `adminTokens/${uid}`), snapshot => {
+                db.ref(`adminTokens/${uid}`).once('value', snapshot => {
                     if (snapshot.exists()) {
                         document.getElementById('subscription-status').textContent = 'Já inscrito em notificações push!';
                         document.getElementById('subscribe-btn').style.display = 'none';
                     }
-                }, { onlyOnce: true });
+                });
 
                 // Receber notificações em foreground
-                onMessage(messaging, payload => {
+                messaging.onMessage(payload => {
                     console.log('Notificação recebida:', payload);
                     const notification = payload.notification;
                     new Notification(notification.title, {
@@ -151,37 +152,37 @@
             }
         });
 
-        window.logarAdmin = () => {
-            const email = document.getElementById('email').value, senha = document.getElementById('senha').value,
-                le = document.getElementById('login-error');
+        function logarAdmin() {
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const le = document.getElementById('login-error');
             le.style.display = 'none';
-            signInWithEmailAndPassword(auth, email, senha)
+            auth.signInWithEmailAndPassword(email, senha)
                 .then(() => {
                     console.log('Login bem-sucedido');
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('main-interface').style.display = 'flex';
-                    iniciarPainel();
                 })
                 .catch(e => {
                     console.error("Erro no login:", e);
-                    le.textContent = "Erro ao logar: " + (e.message === 'Firebase: Error (auth/invalid-credential).' ? 'Credenciais inválidas. Verifique e-mail e senha.' : e.message);
+                    le.textContent = "Erro ao logar: " + (e.code === 'auth/invalid-credential' ? 'Credenciais inválidas. Verifique e-mail e senha.' : e.message);
                     le.style.display = 'block';
                 });
-        };
+        }
 
-        window.deslogarAdmin = () => customConfirm("Deseja realmente deslogar?", c => {
-            if (c) signOut(auth).then(() => {
-                document.getElementById('main-interface').style.display = 'none';
-                document.getElementById('login-screen').style.display = 'flex';
-                document.getElementById('email').value = '';
-                document.getElementById('senha').value = '';
-                document.getElementById('login-error').style.display = 'none';
-                set(ref(db, 'status/admin'), { online: false, isTyping: false });
-            }).catch(e => {
-                console.error("Erro ao deslogar:", e);
-                customAlert("Erro ao deslogar: " + e.message);
+        function deslogarAdmin() {
+            customConfirm("Deseja realmente deslogar?", c => {
+                if (c) {
+                    auth.signOut().then(() => {
+                        document.getElementById('email').value = '';
+                        document.getElementById('senha').value = '';
+                        document.getElementById('login-error').style.display = 'none';
+                        db.ref('status/admin').set({ online: false, isTyping: false });
+                    }).catch(e => {
+                        console.error("Erro ao deslogar:", e);
+                        customAlert("Erro ao deslogar: " + e.message);
+                    });
+                }
             });
-        });
+        }
 
         const debounce = (func, wait) => {
             let timeout;
@@ -192,17 +193,20 @@
         };
 
         function iniciarPainel() {
-            const adminStatusRef = ref(db, 'status/admin');
-            set(adminStatusRef, { online: true, isTyping: false }).catch(e => console.error('Erro ao definir status:', e));
-            window.onunload = () => set(adminStatusRef, { online: false, isTyping: false });
-            const statusRef = ref(db, 'status'), cl = document.getElementById('clientes-lista'),
-                mt = document.getElementById('mensagem'), cc = document.getElementById('char-count'),
-                debouncedTyping = debounce(() => { update(adminStatusRef, { isTyping: false }); }, 1000);
+            const adminStatusRef = db.ref('status/admin');
+            adminStatusRef.set({ online: true, isTyping: false }).catch(e => console.error('Erro ao definir status:', e));
+            window.onunload = () => adminStatusRef.set({ online: false, isTyping: false });
+            const statusRef = db.ref('status');
+            const cl = document.getElementById('clientes-lista');
+            const mt = document.getElementById('mensagem');
+            const cc = document.getElementById('char-count');
+            const debouncedTyping = debounce(() => { adminStatusRef.update({ isTyping: false }); }, 1000);
+
             mt.addEventListener('input', function () {
                 const l = this.value.length;
                 cc.textContent = `${l}/500`;
                 cc.classList.toggle('warning', l >= 450);
-                update(adminStatusRef, { isTyping: true });
+                adminStatusRef.update({ isTyping: true });
                 debouncedTyping();
             });
             mt.addEventListener('keydown', e => {
@@ -211,7 +215,8 @@
                     enviarMensagem();
                 }
             });
-            onValue(statusRef, s => {
+
+            statusRef.on('value', s => {
                 const c = s.val() || {}, o = [], f = [];
                 cl.innerHTML = '';
                 for (let id in c) {
@@ -229,20 +234,20 @@
                     document.querySelectorAll('.cliente').forEach(c => c.style.display = c.querySelector('.cliente-id').textContent.toLowerCase().includes(t) ? '' : 'none');
                 };
                 if (clienteSelecionado) atualizarChat(clienteSelecionado);
-            }, { onlyOnce: false });
+            });
         }
 
         function atualizarChat(id) {
             const ch = document.getElementById('chat'), ti = document.getElementById('typing-indicator'),
                 ct = document.getElementById('chat-title'), cs = document.getElementById('chat-status'),
-                mr = ref(db, 'mensagens/' + id), sr = ref(db, 'status/' + id);
-            onValue(sr, s => {
+                mr = db.ref('mensagens/' + id), sr = db.ref('status/' + id);
+            sr.on('value', s => {
                 const cd = s.val() || {}, n = cd.nome || id, it = cd.isTyping || false;
                 ct.textContent = `Chat com ${n}`;
                 cs.textContent = cd.online ? 'online' : 'offline';
                 cs.className = `chat-status ${cd.online ? 'online' : 'offline'}`;
                 ti.style.display = it ? 'block' : 'none';
-                onValue(mr, ms => {
+                mr.on('value', ms => {
                     const m = ms.val() || {};
                     ch.innerHTML = '';
                     if (!Object.keys(m).length) ch.innerHTML = '<p>Sem mensagens ainda.</p>';
@@ -261,22 +266,22 @@
                         ch.scrollTop = ch.scrollHeight;
                     }
                 });
-            }, { onlyOnce: false });
-            onChildAdded(mr, s => {
+            });
+            mr.on('child_added', s => {
                 const msg = s.val();
-                if (id === clienteSelecionado && msg.de !== 'admin') update(sr, { unreadCount: 0 });
+                if (id === clienteSelecionado && msg.de !== 'admin') sr.update({ unreadCount: 0 });
             });
         }
 
-        window.selecionarCliente = id => {
+        function selecionarCliente(id) {
             if (clienteSelecionado !== id) {
                 clienteSelecionado = id;
                 document.querySelectorAll('.cliente').forEach(c => c.classList.remove('selecionado'));
                 const s = document.querySelector(`[data-id="${id}"]`);
                 if (s) s.classList.add('selecionado');
-                update(ref(db, 'status/' + id), { unreadCount: 0 });
+                db.ref('status/' + id).update({ unreadCount: 0 });
                 atualizarChat(id);
-                onValue(ref(db, 'status'), s => {
+                db.ref('status').once('value', s => {
                     const c = s.val() || {}, cl = document.getElementById('clientes-lista'), o = [], f = [];
                     cl.innerHTML = '';
                     for (let id in c) {
@@ -289,29 +294,29 @@
                         }
                     }
                     cl.innerHTML = o.join('') + f.join('');
-                }, { onlyOnce: true });
+                });
             }
-        };
+        }
 
-        window.enviarMensagem = () => {
+        function enviarMensagem() {
             const mt = document.getElementById('mensagem'), t = mt.value.trim();
             if (!clienteSelecionado) return customAlert("Selecione um cliente primeiro!");
             if (t) {
                 if (t.length > 500) return customAlert("A mensagem não pode exceder 500 caracteres!");
-                push(ref(db, 'mensagens/' + clienteSelecionado), { texto: t, de: 'admin', timestamp: Date.now() });
+                db.ref('mensagens/' + clienteSelecionado).push({ texto: t, de: 'admin', timestamp: Date.now() });
                 mt.value = '';
-                update(ref(db, 'status/admin'), { isTyping: false });
-                update(ref(db, 'status/' + clienteSelecionado), { unreadCount: 0 });
+                db.ref('status/admin').update({ isTyping: false });
+                db.ref('status/' + clienteSelecionado).update({ unreadCount: 0 });
                 document.getElementById('char-count').textContent = '0/500';
             }
-        };
+        }
 
-        window.deletarCliente = (id, e) => {
+        function deletarCliente(id, e) {
             e.stopPropagation();
             customConfirm(`Deseja deletar o chat do cliente ${id}?`, c => {
                 if (c) {
-                    remove(ref(db, 'status/' + id));
-                    remove(ref(db, 'mensagens/' + id));
+                    db.ref('status/' + id).remove();
+                    db.ref('mensagens/' + id).remove();
                     if (clienteSelecionado === id) {
                         clienteSelecionado = null;
                         document.getElementById('chat').innerHTML = '';
@@ -321,30 +326,34 @@
                     }
                 }
             });
-        };
+        }
 
-        window.deletarClientesInativos = () => customConfirm("Deseja apagar TODOS os clientes inativos? Essa ação não pode ser desfeita!", c => {
-            if (c) onValue(ref(db, 'status'), s => {
-                const cl = s.val() || {};
-                for (let id in cl) {
-                    if (id !== 'admin' && !cl[id].online) {
-                        remove(ref(db, 'status/' + id));
-                        remove(ref(db, 'mensagens/' + id));
+        function deletarClientesInativos() {
+            customConfirm("Deseja apagar TODOS os clientes inativos? Essa ação não pode ser desfeita!", c => {
+                if (c) db.ref('status').once('value', s => {
+                    const cl = s.val() || {};
+                    for (let id in cl) {
+                        if (id !== 'admin' && !cl[id].online) {
+                            db.ref('status/' + id).remove();
+                            db.ref('mensagens/' + id).remove();
+                        }
                     }
-                }
-                if (clienteSelecionado && !cl[clienteSelecionado]?.online) {
-                    clienteSelecionado = null;
-                    document.getElementById('chat').innerHTML = '';
-                    document.getElementById('chat-title').textContent = '';
-                    document.getElementById('chat-status').textContent = '';
-                    document.getElementById('typing-indicator').style.display = 'none';
-                }
-            }, { onlyOnce: true });
-        });
+                    if (clienteSelecionado && !cl[clienteSelecionado]?.online) {
+                        clienteSelecionado = null;
+                        document.getElementById('chat').innerHTML = '';
+                        document.getElementById('chat-title').textContent = '';
+                        document.getElementById('chat-status').textContent = '';
+                        document.getElementById('typing-indicator').style.display = 'none';
+                    }
+                });
+            });
+        }
 
-        window.deletarMensagem = (cid, mid) => customConfirm("Deseja apagar esta mensagem?", c => c && remove(ref(db, `mensagens/${cid}/${mid}`)));
+        function deletarMensagem(cid, mid) {
+            customConfirm("Deseja apagar esta mensagem?", c => c && db.ref(`mensagens/${cid}/${mid}`).remove());
+        }
 
-        window.editarMensagem = (cid, mid, t) => {
+        function editarMensagem(cid, mid, t) {
             const msgElement = document.querySelector(`.mensagem[data-msg-id="${mid}"]`),
                 textElement = msgElement.querySelector('.msg-text'),
                 editBtn = msgElement.querySelector('.edit-btn');
@@ -360,7 +369,7 @@
                 const textarea = msgElement.querySelector('.editable-textarea'),
                     newText = textarea.value.trim();
                 if (newText && newText.length <= 500) {
-                    update(ref(db, `mensagens/${cid}/${mid}`), { texto: newText }).then(() => {
+                    db.ref(`mensagens/${cid}/${mid}`).update({ texto: newText }).then(() => {
                         const newTextElement = document.createElement('span');
                         newTextElement.className = 'msg-text';
                         newTextElement.textContent = newText;
@@ -371,33 +380,31 @@
                     customAlert(newText ? 'A mensagem editada não pode exceder 500 caracteres!' : 'A mensagem não pode ser vazia!');
                 }
             }
-        };
+        }
 
-        window.renomearCliente = (id, e) => {
+        function renomearCliente(id, e) {
             e.stopPropagation();
-            onValue(ref(db, 'status/' + id), s => {
+            db.ref('status/' + id).once('value', s => {
                 const cd = s.val() || {}, n = cd.nome || id;
-                customPrompt(`Digite o novo nome para o cliente ${n}:`, n, nn => nn && nn.trim() !== '' && update(ref(db, 'status/' + id), { nome: nn.trim() }).then(() => {
+                customPrompt(`Digite o novo nome para o cliente ${n}:`, n, nn => nn && nn.trim() !== '' && db.ref('status/' + id).update({ nome: nn.trim() }).then(() => {
                     if (clienteSelecionado === id) atualizarChat(id);
                 }));
-            }, { onlyOnce: true });
-        };
+            });
+        }
 
-        // Função para salvar o token no Realtime Database
         function saveAdminToken(token) {
             const uid = auth.currentUser.uid;
-            const adminTokenRef = ref(db, `adminTokens/${uid}`);
-            set(adminTokenRef, { token: token, timestamp: Date.now() })
+            const adminTokenRef = db.ref(`adminTokens/${uid}`);
+            adminTokenRef.set({ token: token, timestamp: Date.now() })
                 .then(() => console.log('Token salvo com sucesso'))
                 .catch(e => console.error('Erro ao salvar token:', e));
         }
 
-        // Função para inscrever-se em notificações push
         function subscribeToPush() {
             Notification.requestPermission().then(permission => {
                 if (permission === 'granted') {
                     console.log('Permissão para notificações concedida');
-                    getToken(messaging, { vapidKey: 'BCIRsN3lHlpe7xAnIdYKAdcCD6vGBt9bAjkXUrRWfpg7O_WA1w_bfM3QfcjeQ1DR4FUYu9K36kQ-A5zvM2YsQiA' })
+                    messaging.getToken({ vapidKey: 'BCIRsN3lHlpe7xAnIdYKAdcCD6vGBt9bAjkXUrRWfpg7O_WA1w_bfM3QfcjeQ1DR4FUYu9K36kQ-A5zvM2YsQiA' })
                         .then(token => {
                             console.log('Token FCM:', token);
                             saveAdminToken(token);
@@ -414,7 +421,6 @@
             });
         }
 
-        // Service Worker para notificações em background
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/firebase-messaging-sw.js')
                 .then(registration => console.log('Service Worker registrado:', registration))
