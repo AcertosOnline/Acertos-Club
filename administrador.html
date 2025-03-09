@@ -6,7 +6,6 @@
     <title>Painel do Administrador</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- Firebase Compat (scripts normais, sem módulos) -->
     <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
@@ -71,7 +70,6 @@
         </div>
     </div>
     <script>
-        // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyA1C3iYQe22zhTP5HVj19atOZLROtba3rw",
             authDomain: "jogo-do-bicho-421ff.firebaseapp.com",
@@ -83,14 +81,12 @@
             measurementId: "G-BPH150V2SG"
         };
 
-        // Inicializar Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth(app);
         const db = firebase.database(app);
         const messaging = firebase.messaging(app);
         let clienteSelecionado = null;
 
-        // Funções auxiliares
         const formatarTimestamp = t => new Date(t).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         const escapeJsString = text => text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
 
@@ -113,7 +109,6 @@
             document.getElementById('modal-input').value = dv || '';
         };
 
-        // Autenticação
         auth.onAuthStateChanged(user => {
             const ls = document.getElementById('login-screen');
             const mi = document.getElementById('main-interface');
@@ -126,7 +121,6 @@
                 console.log('Usuário autenticado:', user.uid);
                 document.getElementById('subscribe-btn').onclick = subscribeToPush;
 
-                // Verificar se já está inscrito
                 const uid = user.uid;
                 db.ref(`adminTokens/${uid}`).once('value', snapshot => {
                     if (snapshot.exists()) {
@@ -135,13 +129,12 @@
                     }
                 });
 
-                // Receber notificações em foreground
                 messaging.onMessage(payload => {
                     console.log('Notificação recebida:', payload);
                     const notification = payload.notification;
                     new Notification(notification.title, {
                         body: notification.body,
-                        icon: '/path/to/icon.png' // Opcional: ícone customizado
+                        icon: '/path/to/icon.png'
                     });
                 });
             } else {
@@ -299,7 +292,7 @@
         }
 
         function enviarMensagem() {
-            const mt = document.getElementById('mensagem'), t = mt.value.trim();
+            const mt = document.getElementById('mens👴agem'), t = mt.value.trim();
             if (!clienteSelecionado) return customAlert("Selecione um cliente primeiro!");
             if (t) {
                 if (t.length > 500) return customAlert("A mensagem não pode exceder 500 caracteres!");
@@ -413,11 +406,20 @@
                         })
                         .catch(err => {
                             console.error('Erro ao obter token:', err);
-                            document.getElementById('subscription-status').textContent = 'Erro ao inscrever-se.';
+                            if (err.code === 'messaging/permission-blocked') {
+                                document.getElementById('subscription-status').textContent = 'Notificações bloqueadas pelo navegador. Habilite-as nas configurações.';
+                            } else if (err.code === 'permission_denied') {
+                                document.getElementById('subscription-status').textContent = 'Permissão negada para salvar o token. Verifique as regras do Firebase.';
+                            } else {
+                                document.getElementById('subscription-status').textContent = 'Erro ao inscrever-se: ' + err.message;
+                            }
                         });
                 } else {
                     document.getElementById('subscription-status').textContent = 'Permissão negada para notificações.';
                 }
+            }).catch(err => {
+                console.error('Erro ao solicitar permissão:', err);
+                document.getElementById('subscription-status').textContent = 'Erro ao solicitar permissão para notificações.';
             });
         }
 
