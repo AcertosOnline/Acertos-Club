@@ -113,19 +113,38 @@
             const ls = document.getElementById('login-screen');
             const mi = document.getElementById('main-interface');
             const ps = document.getElementById('push-subscription');
+            const subscriptionStatus = document.getElementById('subscription-status');
+            const subscribeBtn = document.getElementById('subscribe-btn');
+
             if (user) {
                 ls.style.display = 'none';
                 mi.style.display = 'flex';
                 ps.style.display = 'block';
                 iniciarPainel();
                 console.log('Usuário autenticado:', user.uid);
-                document.getElementById('subscribe-btn').onclick = subscribeToPush;
+                subscribeBtn.onclick = subscribeToPush;
 
                 const uid = user.uid;
                 db.ref(`adminTokens/${uid}`).once('value', snapshot => {
                     if (snapshot.exists()) {
-                        document.getElementById('subscription-status').textContent = 'Já inscrito em notificações push!';
-                        document.getElementById('subscribe-btn').style.display = 'none';
+                        const savedToken = snapshot.val().token;
+                        messaging.getToken({ vapidKey: 'BCIRsN3lHlpe7xAnIdYKAdcCD6vGBt9bAjkXUrRWfpg7O_WA1w_bfM3QfcjeQ1DR4FUYu9K36kQ-A5zvM2YsQiA' })
+                            .then(currentToken => {
+                                if (currentToken && isTokenValid(currentToken)) {
+                                    subscriptionStatus.textContent = 'Já inscrito em notificações push neste dispositivo!';
+                                    subscribeBtn.style.display = 'none';
+                                } else {
+                                    subscriptionStatus.textContent = 'Inscreva-se para receber notificações neste dispositivo.';
+                                    subscribeBtn.style.display = 'inline-block';
+                                }
+                            })
+                            .catch(() => {
+                                subscriptionStatus.textContent = 'Inscreva-se para receber notificações neste dispositivo.';
+                                subscribeBtn.style.display = 'inline-block';
+                            });
+                    } else {
+                        subscriptionStatus.textContent = 'Inscreva-se para receber notificações neste dispositivo.';
+                        subscribeBtn.style.display = 'inline-block';
                     }
                 });
 
@@ -151,9 +170,7 @@
             const le = document.getElementById('login-error');
             le.style.display = 'none';
             auth.signInWithEmailAndPassword(email, senha)
-                .then(() => {
-                    console.log('Login bem-sucedido');
-                })
+                .then(() => console.log('Login bem-sucedido'))
                 .catch(e => {
                     console.error("Erro no login:", e);
                     le.textContent = "Erro ao logar: " + (e.code === 'auth/invalid-credential' ? 'Credenciais inválidas. Verifique e-mail e senha.' : e.message);
@@ -292,7 +309,7 @@
         }
 
         function enviarMensagem() {
-            const mt = document.getElementById('mens👴agem'), t = mt.value.trim();
+            const mt = document.getElementById('mensagem'), t = mt.value.trim();
             if (!clienteSelecionado) return customAlert("Selecione um cliente primeiro!");
             if (t) {
                 if (t.length > 500) return customAlert("A mensagem não pode exceder 500 caracteres!");
@@ -388,38 +405,54 @@
         function saveAdminToken(token) {
             const uid = auth.currentUser.uid;
             const adminTokenRef = db.ref(`adminTokens/${uid}`);
-            adminTokenRef.set({ token: token, timestamp: Date.now() })
-                .then(() => console.log('Token salvo com sucesso'))
-                .catch(e => console.error('Erro ao salvar token:', e));
+            adminTokenRef.set({
+                token: token,
+                timestamp: Date.now()
+            }).then(() => {
+                console.log('Token salvo com sucesso');
+                localStorage.setItem(`pushToken_${uid}`, token);
+            }).catch(e => console.error('Erro ao salvar token:', e));
+        }
+
+        function isTokenValid(currentToken) {
+            const uid = auth.currentUser.uid;
+            const storedToken = localStorage.getItem(`pushToken_${uid}`);
+            return currentToken === storedToken;
         }
 
         function subscribeToPush() {
+            const subscriptionStatus = document.getElementById('subscription-status');
+            const subscribeBtn = document.getElementById('subscribe-btn');
+
             Notification.requestPermission().then(permission => {
                 if (permission === 'granted') {
                     console.log('Permissão para notificações concedida');
                     messaging.getToken({ vapidKey: 'BCIRsN3lHlpe7xAnIdYKAdcCD6vGBt9bAjkXUrRWfpg7O_WA1w_bfM3QfcjeQ1DR4FUYu9K36kQ-A5zvM2YsQiA' })
-                        .then(token => {
-                            console.log('Token FCM:', token);
-                            saveAdminToken(token);
-                            document.getElementById('subscription-status').textContent = 'Inscrito em notificações push!';
-                            document.getElementById('subscribe-btn').style.display = 'none';
+                        .then(currentToken => {
+                            console.log('Token FCM:', currentToken);
+                            if (isTokenValid(currentToken)) {
+                                subscriptionStatus.textContent = 'Já inscrito em notificações push neste dispositivo!';
+                                subscribeBtn.style.display = 'none';
+                            } else {
+                                saveAdminToken(currentToken);
+                                subscriptionStatus.textContent = 'Inscrito em notificações push neste dispositivo!';
+                                subscribeBtn.style.display = 'none';
+                            }
                         })
                         .catch(err => {
                             console.error('Erro ao obter token:', err);
                             if (err.code === 'messaging/permission-blocked') {
-                                document.getElementById('subscription-status').textContent = 'Notificações bloqueadas pelo navegador. Habilite-as nas configurações.';
-                            } else if (err.code === 'permission_denied') {
-                                document.getElementById('subscription-status').textContent = 'Permissão negada para salvar o token. Verifique as regras do Firebase.';
+                                subscriptionStatus.textContent = 'Notificações bloqueadas pelo navegador. Habilite-as nas configurações.';
                             } else {
-                                document.getElementById('subscription-status').textContent = 'Erro ao inscrever-se: ' + err.message;
+                                subscriptionStatus.textContent = 'Erro ao inscrever-se: ' + err.message;
                             }
                         });
                 } else {
-                    document.getElementById('subscription-status').textContent = 'Permissão negada para notificações.';
+                    subscriptionStatus.textContent = 'Permissão negada para notificações.';
                 }
             }).catch(err => {
                 console.error('Erro ao solicitar permissão:', err);
-                document.getElementById('subscription-status').textContent = 'Erro ao solicitar permissão para notificações.';
+                subscriptionStatus.textContent = 'Erro ao solicitar permissão para notificações.';
             });
         }
 
