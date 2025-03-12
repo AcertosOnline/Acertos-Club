@@ -120,7 +120,8 @@
         }
         #typing-indicator { 
             font-size: 12px; 
-            color: #8080b3; GELROKfont-style: italic; 
+            color: #8080b3; 
+            font-style: italic; 
             margin: 5px 0; 
         }
     </style>
@@ -170,6 +171,7 @@
         const mensagemInput = document.getElementById('mensagem');
         const charCounter = document.getElementById('char-counter');
         const typingIndicator = document.getElementById('typing-indicator');
+        let hasNotified = false; // Flag para controlar notificação única
 
         function formatarTimestamp(timestamp) {
             const data = new Date(timestamp);
@@ -220,7 +222,7 @@
                         texto: texto,
                         de: 'cliente',
                         timestamp: Date.now(),
-                        notified: false // Adiciona flag para evitar duplicatas
+                        notified: false
                     };
                     const novaMensagemRef = push(mensagensRef);
                     set(novaMensagemRef, novaMensagem).then(() => {
@@ -232,10 +234,10 @@
                             });
                         }, { onlyOnce: true });
 
-                        // Verifica se o admin está offline e envia notificação
+                        // Verifica se o admin está offline e se ainda não notificou
                         onValue(adminStatusRef, (snapshot) => {
                             const adminStatus = snapshot.val();
-                            if (!adminStatus?.online) {
+                            if (!adminStatus?.online && !hasNotified) {
                                 fetch(GOOGLE_APPS_SCRIPT_URL, {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
@@ -248,7 +250,7 @@
                                 .then(data => {
                                     console.log('Resposta do Google Apps Script:', data);
                                     if (data.success) {
-                                        // Marca a mensagem como notificada
+                                        hasNotified = true; // Marca como notificado
                                         update(ref(db, `mensagens/${clienteId}/${novaMensagemRef.key}`), { notified: true });
                                     } else {
                                         console.error('Erro ao enviar notificação:', data.message);
@@ -288,6 +290,9 @@
                 const isTyping = snapshot.val()?.isTyping || false;
                 typingIndicator.style.display = isTyping ? 'block' : 'none';
                 if (isTyping) chat.scrollTop = chat.scrollHeight;
+
+                // Reseta a flag de notificação quando o admin fica online
+                if (snapshot.val()?.online) hasNotified = false;
             });
         }
 
