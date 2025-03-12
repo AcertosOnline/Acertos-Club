@@ -120,8 +120,7 @@
         }
         #typing-indicator { 
             font-size: 12px; 
-            color: #8080b3; 
-            font-style: italic; 
+            color: #8080b3; GELROKfont-style: italic; 
             margin: 5px 0; 
         }
     </style>
@@ -164,6 +163,8 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
+        const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxAbCh1OvSJnWPc6MkrcBH3A7Ppy9KsQ1ovVEoUmKnn8oxjuuxJpDmYVkJQhNPAhb4mw/exec";
+
         let clienteId = localStorage.getItem('clienteId');
         const clienteIdDisplay = document.getElementById('cliente-id');
         const mensagemInput = document.getElementById('mensagem');
@@ -193,7 +194,7 @@
 
                 typingTimeout = setTimeout(() => {
                     update(statusRef, { isTyping: false });
-                }, 1000); // Para de indicar "digitando" após 1 segundo sem atividade
+                }, 1000);
             });
         }
 
@@ -215,37 +216,50 @@
             window.enviarMensagem = function() {
                 const texto = mensagemInput.value.trim();
                 if (texto) {
-                    const novaMensagemRef = push(mensagensRef, {
+                    const novaMensagem = {
                         texto: texto,
                         de: 'cliente',
-                        timestamp: Date.now()
+                        timestamp: Date.now(),
+                        notified: false // Adiciona flag para evitar duplicatas
+                    };
+                    const novaMensagemRef = push(mensagensRef);
+                    set(novaMensagemRef, novaMensagem).then(() => {
+                        onValue(statusRef, (snapshot) => {
+                            const currentCount = snapshot.val()?.unreadCount || 0;
+                            update(statusRef, { 
+                                unreadCount: currentCount + 1,
+                                isTyping: false
+                            });
+                        }, { onlyOnce: true });
+
+                        // Verifica se o admin está offline e envia notificação
+                        onValue(adminStatusRef, (snapshot) => {
+                            const adminStatus = snapshot.val();
+                            if (!adminStatus?.online) {
+                                fetch(GOOGLE_APPS_SCRIPT_URL, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        clienteId: clienteId,
+                                        mensagem: texto
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    console.log('Resposta do Google Apps Script:', data);
+                                    if (data.success) {
+                                        // Marca a mensagem como notificada
+                                        update(ref(db, `mensagens/${clienteId}/${novaMensagemRef.key}`), { notified: true });
+                                    } else {
+                                        console.error('Erro ao enviar notificação:', data.message);
+                                    }
+                                })
+                                .catch(err => console.error('Erro ao chamar Google Apps Script:', err));
+                            }
+                        }, { onlyOnce: true });
                     });
-                    onValue(statusRef, (snapshot) => {
-                        const currentCount = snapshot.val()?.unreadCount || 0;
-                        update(statusRef, { 
-                            unreadCount: currentCount + 1,
-                            isTyping: false // Para o status de digitando ao enviar
-                        });
-                    }, { onlyOnce: true });
                     mensagemInput.value = '';
                     atualizarContador();
-
-                    // Verificar se o admin está offline e enviar notificação via Google Apps Script
-                    onValue(ref(db, 'status/admin'), (snapshot) => {
-                        const adminStatus = snapshot.val();
-                        if (!adminStatus?.online) {
-                            fetch('https://script.google.com/macros/s/AKfycbyxAbCh1OvSJnWPc6MkrcBH3A7Ppy9KsQ1ovVEoUmKnn8oxjuuxJpDmYVkJQhNPAhb4mw/exec', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    clienteId: clienteId,
-                                    mensagem: texto
-                                })
-                            })
-                            .then(response => console.log('Solicitação enviada ao Google Apps Script'))
-                            .catch(err => console.error('Erro ao chamar Google Apps Script:', err));
-                        }
-                    }, { onlyOnce: true });
                 }
             };
 
@@ -271,10 +285,9 @@
                 statusElement.textContent = status;
                 statusElement.className = snapshot.val()?.online ? 'online' : 'offline';
 
-                // Mostra o indicador de "Suporte está digitando..."
                 const isTyping = snapshot.val()?.isTyping || false;
                 typingIndicator.style.display = isTyping ? 'block' : 'none';
-                if (isTyping) chat.scrollTop = chat.scrollHeight; // Rola para baixo quando digitando
+                if (isTyping) chat.scrollTop = chat.scrollHeight;
             });
         }
 
