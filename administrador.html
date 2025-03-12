@@ -461,6 +461,15 @@
                 .then(registration => console.log('Service Worker registrado:', registration))
                 .catch(err => console.error('Erro ao registrar Service Worker:', err));
         }
+        
+// No final do script da página do administrador
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const clienteIdFromUrl = urlParams.get('clienteId');
+    if (clienteIdFromUrl) {
+        selecionarCliente(clienteIdFromUrl);
+    }
+});
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
 </body>
