@@ -215,55 +215,53 @@
 
             atualizarStatusDigitando(statusRef);
 
-            window.enviarMensagem = function() {
-                const texto = mensagemInput.value.trim();
-                if (texto) {
-                    const novaMensagem = {
-                        texto: texto,
-                        de: 'cliente',
-                        timestamp: Date.now(),
-                        notified: false
-                    };
-                    const novaMensagemRef = push(mensagensRef);
-                    set(novaMensagemRef, novaMensagem).then(() => {
-                        onValue(statusRef, (snapshot) => {
-                            const currentCount = snapshot.val()?.unreadCount || 0;
-                            update(statusRef, { 
-                                unreadCount: currentCount + 1,
-                                isTyping: false
-                            });
-                        }, { onlyOnce: true });
+window.enviarMensagem = function() {
+  const texto = mensagemInput.value.trim();
+  if (texto) {
+    const novaMensagem = {
+      texto: texto,
+      de: 'cliente',
+      timestamp: Date.now(),
+      notified: false
+    };
+    const novaMensagemRef = push(mensagensRef);
+    set(novaMensagemRef, novaMensagem).then(() => {
+      onValue(statusRef, (snapshot) => {
+        const currentCount = snapshot.val()?.unreadCount || 0;
+        update(statusRef, { 
+          unreadCount: currentCount + 1,
+          isTyping: false
+        });
+      }, { onlyOnce: true });
 
-                        // Verifica se o admin está offline e se ainda não notificou
-                        onValue(adminStatusRef, (snapshot) => {
-                            const adminStatus = snapshot.val();
-                            if (!adminStatus?.online && !hasNotified) {
-                                fetch(GOOGLE_APPS_SCRIPT_URL, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        clienteId: clienteId,
-                                        mensagem: texto
-                                    })
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    console.log('Resposta do Google Apps Script:', data);
-                                    if (data.success) {
-                                        hasNotified = true; // Marca como notificado
-                                        update(ref(db, `mensagens/${clienteId}/${novaMensagemRef.key}`), { notified: true });
-                                    } else {
-                                        console.error('Erro ao enviar notificação:', data.message);
-                                    }
-                                })
-                                .catch(err => console.error('Erro ao chamar Google Apps Script:', err));
-                            }
-                        }, { onlyOnce: true });
-                    });
-                    mensagemInput.value = '';
-                    atualizarContador();
-                }
-            };
+      // Verifica se o admin está offline e se ainda não notificou
+      onValue(adminStatusRef, (snapshot) => {
+        const adminStatus = snapshot.val();
+        if (!adminStatus?.online && !hasNotified) {
+          const formData = `clienteId=${encodeURIComponent(clienteId)}&mensagem=${encodeURIComponent(texto)}`;
+          fetch(GOOGLE_APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Resposta do Google Apps Script:', data);
+            if (data.success) {
+              hasNotified = true;
+              update(ref(db, `mensagens/${clienteId}/${novaMensagemRef.key}`), { notified: true });
+            } else {
+              console.error('Erro ao enviar notificação:', data.message);
+            }
+          })
+          .catch(err => console.error('Erro ao chamar Google Apps Script:', err));
+        }
+      }, { onlyOnce: true });
+    });
+    mensagemInput.value = '';
+    atualizarContador();
+  }
+};
 
             onValue(mensagensRef, (snapshot) => {
                 const mensagens = snapshot.val() || {};
