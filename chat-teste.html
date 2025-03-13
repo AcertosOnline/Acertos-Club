@@ -171,7 +171,9 @@
         const mensagemInput = document.getElementById('mensagem');
         const charCounter = document.getElementById('char-counter');
         const typingIndicator = document.getElementById('typing-indicator');
-        let hasNotified = false; // Flag para controlar notificação única
+
+        // Adiciona o áudio de notificação
+        const notificationSound = new Audio('/notification.mp3'); // URL de exemplo, substitua por um som real
 
         function formatarTimestamp(timestamp) {
             const data = new Date(timestamp);
@@ -215,64 +217,81 @@
 
             atualizarStatusDigitando(statusRef);
 
-window.enviarMensagem = function() {
-  const texto = mensagemInput.value.trim();
-  if (texto) {
-    const novaMensagem = {
-      texto: texto,
-      de: 'cliente',
-      timestamp: Date.now(),
-      notified: false
-    };
-    const novaMensagemRef = push(mensagensRef);
-    set(novaMensagemRef, novaMensagem).then(() => {
-      onValue(statusRef, (snapshot) => {
-        const currentCount = snapshot.val()?.unreadCount || 0;
-        update(statusRef, { 
-          unreadCount: currentCount + 1,
-          isTyping: false
-        });
-      }, { onlyOnce: true });
+            window.enviarMensagem = function() {
+                const texto = mensagemInput.value.trim();
+                if (texto) {
+                    const novaMensagem = {
+                        texto: texto,
+                        de: 'cliente',
+                        timestamp: Date.now(),
+                        notified: false
+                    };
+                    const novaMensagemRef = push(mensagensRef);
+                    set(novaMensagemRef, novaMensagem).then(() => {
+                        onValue(statusRef, (snapshot) => {
+                            const currentCount = snapshot.val()?.unreadCount || 0;
+                            update(statusRef, { 
+                                unreadCount: currentCount + 1,
+                                isTyping: false
+                            });
+                        }, { onlyOnce: true });
 
-      // Verifica se o admin está offline e se ainda não notificou
-      onValue(adminStatusRef, (snapshot) => {
-        const adminStatus = snapshot.val();
-        if (!adminStatus?.online && !hasNotified) {
-          const formData = `clienteId=${encodeURIComponent(clienteId)}&mensagem=${encodeURIComponent(texto)}`;
-          fetch(GOOGLE_APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: formData
-          })
-          .then(response => response.json())
-          .then(data => {
-            console.log('Resposta do Google Apps Script:', data);
-            if (data.success) {
-              hasNotified = true;
-              update(ref(db, `mensagens/${clienteId}/${novaMensagemRef.key}`), { notified: true });
-            } else {
-              console.error('Erro ao enviar notificação:', data.message);
-            }
-          })
-          .catch(err => console.error('Erro ao chamar Google Apps Script:', err));
-        }
-      }, { onlyOnce: true });
-    });
-    mensagemInput.value = '';
-    atualizarContador();
-  }
-};
+                        onValue(adminStatusRef, (snapshot) => {
+                            const adminStatus = snapshot.val();
+                            const notificationSent = localStorage.getItem('notificationSent') === 'true';
+                            if (!adminStatus?.online && !notificationSent) {
+                                const formData = `clienteId=${encodeURIComponent(clienteId)}&mensagem=${encodeURIComponent(texto)}`;
+                                fetch(GOOGLE_APPS_SCRIPT_URL, {
+                                    method: 'POST',
+                                    mode: 'no-cors',
+                                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                    body: formData
+                                });
+                                localStorage.setItem('notificationSent', 'true');
+                                update(ref(db, `mensagens/${clienteId}/${novaMensagemRef.key}`), { notified: true });
+                            }
+                        }, { onlyOnce: true });
+                    });
+                    mensagemInput.value = '';
+                    atualizarContador();
+                }
+            };
 
+            let ultimaQuantidadeMensagens = 0; // Rastreia o número de mensagens anterior
             onValue(mensagensRef, (snapshot) => {
                 const mensagens = snapshot.val() || {};
                 const chat = document.getElementById('chat');
-                chat.innerHTML = '';
-                for (let key in mensagens) {
-                    const msg = mensagens[key];
-                    const classe = msg.de === 'cliente' ? 'cliente-msg' : 'suporte-msg';
-                    const timestampFormatado = formatarTimestamp(msg.timestamp);
-                    chat.innerHTML += `<div class="mensagem ${classe}"><b>${msg.de === 'cliente' ? 'Você' : 'Suporte'}:</b> ${msg.texto}<span class="timestamp">${timestampFormatado}</span></div>`;
+                const quantidadeAtual = Object.keys(mensagens).length;
+
+                // Verifica se uma nova mensagem foi recebida e se a página está em segundo plano
+                if (quantidadeAtual > ultimaQuantidadeMensagens && document.visibilityState === 'hidden') {
+                    notificationSound.play().catch(error => {
+                        console.log("Erro ao tocar som de notificação:", error);
+                    });
                 }
+                ultimaQuantidadeMensagens = quantidadeAtual;
+
+                chat.innerHTML = '';
+                let ultimaOrigem = null;
+
+                const mensagensArray = Object.keys(mensagens).map(key => ({
+                    key,
+                    ...mensagens[key]
+                })).sort((a, b) => a.timestamp - b.timestamp);
+
+                mensagensArray.forEach((msg) => {
+                    const classe = msg.de === 'cliente' ? 'cliente-msg' : 'suporte-msg';
+                    const remetente = msg.de === 'cliente' ? 'Você' : 'Suporte';
+                    const timestampFormatado = formatarTimestamp(msg.timestamp);
+                    
+                    const exibirRemetente = ultimaOrigem !== msg.de;
+                    const conteudo = exibirRemetente 
+                        ? `<b>${remetente}:</b> ${msg.texto}` 
+                        : msg.texto;
+
+                    chat.innerHTML += `<div class="mensagem ${classe}">${conteudo}<span class="timestamp">${timestampFormatado}</span></div>`;
+                    ultimaOrigem = msg.de;
+                });
                 chat.scrollTop = chat.scrollHeight;
             });
 
@@ -289,8 +308,9 @@ window.enviarMensagem = function() {
                 typingIndicator.style.display = isTyping ? 'block' : 'none';
                 if (isTyping) chat.scrollTop = chat.scrollHeight;
 
-                // Reseta a flag de notificação quando o admin fica online
-                if (snapshot.val()?.online) hasNotified = false;
+                if (snapshot.val()?.online) {
+                    localStorage.setItem('notificationSent', 'false');
+                }
             });
         }
 
