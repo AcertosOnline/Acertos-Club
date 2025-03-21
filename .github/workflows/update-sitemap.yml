@@ -1,0 +1,41 @@
+name: Update Sitemap Daily
+
+# Executa o workflow todos os dias às 00:00 UTC
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Todo dia à meia-noite UTC
+  workflow_dispatch:  # Permite executar manualmente também
+
+jobs:
+  update-sitemap:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Faz checkout do repositório
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Configura o Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # Executa o script para gerar o sitemap.xml
+      - name: Generate sitemap.xml
+        run: python generate_sitemap.py
+
+      # Configura o Git
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+
+      # Faz commit e push das alterações
+      - name: Commit and push changes
+        run: |
+          git add sitemap.xml
+          git commit -m "Atualiza sitemap.xml com data $(date +'%Y-%m-%d')"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
