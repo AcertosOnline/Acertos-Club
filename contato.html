@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat do Cliente</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+    /* Tema Claro - Inspirado no Windows 11 Fluent Design */
+    :root {
+        --bg-body: #F3F3F3; /* Cinza claro do Mica claro */
+        --color-text: #1F1F1F; /* Preto suave para texto */
+        --bg-navbar: #FFFFFF; /* Branco com leve transparência implícita */
+        --border-navbar: #E6E6E6; /* Borda cinza clara */
+        --bg-chat: #FAFAFA; /* Fundo quase branco para o chat */
+        --bg-message-client: #E8F0FE; /* Azul claro para mensagens do cliente */
+        --bg-message-support: #FFFFFF; /* Branco puro para suporte */
+        --color-message-client: #1F1F1F; /* Texto escuro */
+        --color-message-support: #1F1F1F;
+        --color-timestamp: #6B7280; /* Cinza médio para timestamps */
+        --bg-input: #FFFFFF; /* Fundo branco para campo de entrada */
+        --border-input: #E5E7EB; /* Borda cinza clara */
+        --color-placeholder: #6B7280; /* Cinza para placeholder */
+        --bg-button: #0078D4; /* Azul Windows para botão */
+        --bg-button-hover: #005EA2; /* Azul mais escuro para hover */
+        --bg-button-disabled: #B3C7D6; /* Cinza-azulado desabilitado */
+        --color-button-text: #FFFFFF; /* Texto branco no botão */
+        --color-status-online: #00CC6A; /* Verde Windows para online */
+        --color-status-offline: #D13438; /* Vermelho Windows para offline */
+        --scrollbar-track: rgba(0, 0, 0, 0.05);
+        --scrollbar-thumb: #A3A3A3; /* Cinza suave para scrollbar */
+    }
+
+    /* Tema Escuro - Inspirado no Windows 11 Fluent Design (Dark Mode) */
+    .dark-theme {
+        --bg-body: #202020; /* Cinza escuro profundo do Mica escuro */
+        --color-text: #F3F3F3; /* Texto claro */
+        --bg-navbar: #2B2B2B; /* Cinza escuro para a barra superior */
+        --border-navbar: #1A1A1A; /* Borda mais escura */
+        --bg-chat: #292929; /* Fundo escuro para o chat */
+        --bg-message-client: #2A3F5F; /* Azul escuro para mensagens do cliente */
+        --bg-message-support: #333333; /* Cinza escuro para suporte */
+        --color-message-client: #F3F3F3; /* Texto claro */
+        --color-message-support: #F3F3F3;
+        --color-timestamp: #A3A3A3; /* Cinza claro para timestamps */
+        --bg-input: #333333; /* Fundo escuro para entrada */
+        --border-input: #404040; /* Borda escura */
+        --color-placeholder: #A3A3A3; /* Cinza para placeholder */
+        --bg-button: #0078D4; /* Azul Windows mantido no escuro */
+        --bg-button-hover: #005EA2; /* Azul mais escuro para hover */
+        --bg-button-disabled: #4A5A66; /* Cinza escuro desabilitado */
+        --color-button-text: #FFFFFF; /* Texto branco no botão */
+        --color-status-online: #00CC6A; /* Verde Windows para online */
+        --color-status-offline: #D13438; /* Vermelho Windows para offline */
+        --scrollbar-track: rgba(255, 255, 255, 0.05);
+        --scrollbar-thumb: #808080; /* Cinza claro para scrollbar */
+    }
+
+    /* Estilos Gerais */
+    body {
+        background: var(--bg-body);
+        color: var(--color-text);
+        font-family: 'Segoe UI', 'Arial', 'sans-serif'; /* Fonte padrão do Windows 11 */
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .navbar {
+        background: var(--bg-navbar);
+        border-bottom: 1px solid var(--border-navbar);
+        padding: 12px 16px; /* Espaçamento ajustado ao Windows 11 */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Sombra suave do Fluent */
+        transition: background 0.3s ease;
+        position: relative;
+    }
+
+    .navbar-brand { 
+        color: var(--color-text); 
+        font-weight: 400; /* Leveza típica do Windows */
+        font-size: 18px;
+        margin-bottom: 0;
+    }
+
+    #theme-toggle {
+        background: transparent;
+        color: var(--color-text);
+        border: none;
+        padding: 8px 12px;
+        font-size: 18px;
+        border-radius: 4px; /* Bordas ligeiramente arredondadas */
+        cursor: pointer;
+        transition: background 0.2s ease;
+        position: absolute;
+        top: 50%;
+        right: 16px;
+        transform: translateY(-50%);
+    }
+    #theme-toggle:hover { background: rgba(0, 120, 212, 0.1); } /* Efeito azul sutil */
+    #theme-toggle i { margin: 0; }
+
+    .container {
+        flex: 1;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    #chat {
+        flex: 1;
+        overflow-y: auto;
+        background: var(--bg-chat);
+        border-radius: 8px; /* Bordas arredondadas do Windows 11 */
+        padding: 12px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05); /* Sombra leve do Fluent */
+        scrollbar-width: thin;
+        scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+        transition: background 0.3s ease;
+    }
+
+    #chat::-webkit-scrollbar, #mensagem::-webkit-scrollbar { width: 8px; }
+    #chat::-webkit-scrollbar-track, #mensagem::-webkit-scrollbar-track {
+        background: var(--scrollbar-track);
+        border-radius: 4px;
+    }
+    #chat::-webkit-scrollbar-thumb, #mensagem::-webkit-scrollbar-thumb {
+        background: var(--scrollbar-thumb);
+        border-radius: 4px;
+    }
+
+    .mensagem {
+        margin: 0 0 4px 0;
+        padding: 10px 14px;
+        border-radius: 8px; /* Bordas arredondadas do Fluent */
+        max-width: 75%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06); /* Sombra suave */
+        transition: background 0.3s ease, color 0.3s ease;
+        font-size: 15px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .cliente-msg + .suporte-msg {
+        margin-top: 12px;
+    }
+
+    .suporte-msg + .cliente-msg {
+        margin-top: 12px;
+    }
+
+    .cliente-msg + .cliente-msg {
+        margin-top: 4px;
+    }
+
+    .suporte-msg + .suporte-msg {
+        margin-top: 4px;
+    }
+
+    .cliente-msg {
+        margin-left: auto;
+        background: var(--bg-message-client);
+        color: var(--color-message-client);
+    }
+
+    .suporte-msg {
+        margin-right: auto;
+        background: var(--bg-message-support);
+        color: var(--color-message-support);
+    }
+
+    .timestamp {
+        font-size: 12px;
+        color: var(--color-timestamp);
+        display: block;
+        margin-top: 4px;
+        opacity: 0.9;
+        transition: color 0.3s ease;
+        text-align: right;
+    }
+
+    .typing-container {
+        height: 12px;
+        position: relative;
+        margin-bottom: 8px;
+    }
+
+    #typing-indicator {
+        font-size: 12px;
+        color: var(--color-timestamp);
+        font-style: italic;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        display: none;
+        line-height: 12px;
+    }
+
+    .input-group {
+        margin-top: auto;
+        flex-shrink: 0;
+    }
+
+    #mensagem {
+        background: var(--bg-input);
+        color: var(--color-text);
+        border: 1px solid var(--border-input);
+        resize: none;
+        height: 60px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+        transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        border-radius: 8px 0 0 8px; /* Bordas arredondadas */
+        border-right: none;
+    }
+    #mensagem::placeholder { color: var(--color-placeholder); }
+    #mensagem:focus {
+        background: var(--bg-input);
+        color: var(--color-text);
+        border-color: var(--bg-button);
+        box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2); /* Foco azul do Windows */
+        outline: none;
+    }
+
+    #enviar-btn {
+        background: var(--bg-button);
+        color: var(--color-button-text);
+        border: none;
+        padding: 12px 16px;
+        font-size: 16px;
+        border-radius: 0 8px 8px 0;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+    #enviar-btn:hover { background: var(--bg-button-hover); }
+    #enviar-btn:disabled {
+        background: var(--bg-button-disabled);
+        cursor: not-allowed;
+    }
+
+    #status.online { color: var(--color-status-online); font-weight: 500; }
+    #status.offline { color: var(--color-status-offline); font-weight: 500; }
+    #char-counter { 
+        font-size: 12px; 
+        color: var(--color-timestamp); 
+        margin-top: 6px; 
+        text-align: right;
+    }
+    #chat-loading { 
+        text-align: center; 
+        padding: 20px; 
+        color: var(--color-timestamp); 
+        font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+        .container { padding: 12px; }
+        #chat { height: 50vh; }
+        #mensagem { 
+            height: 48px;
+            font-size: 14px;
+            border-radius: 6px 0 0 6px;
+        }
+        #enviar-btn { 
+            padding: 10px 12px; 
+            font-size: 14px;
+            border-radius: 0 6px 6px 0;
+        }
+        .navbar { padding: 10px 12px; }
+        #theme-toggle { 
+            font-size: 16px; 
+            padding: 6px 10px; 
+            right: 12px;
+        }
+        .mensagem { 
+            font-size: 14px; 
+            padding: 8px 12px; 
+            border-radius: 6px;
+        }
+    }
+</style>
+</head>
+<body class="dark-theme">
+    <nav class="navbar navbar-dark">
+        <div class="container-fluid">
+            <div>
+                <span class="navbar-brand mb-0 h1">Chat com Suporte</span>
+            </div>
+            <button id="theme-toggle" aria-label="Alternar Tema"><i class="fas fa-sun"></i></button>
+        </div>
+    </nav>
+    <div class="container">
+        <div id="chat-loading">Carregando...</div>
+        <div id="chat" style="display: none;"></div>
+        <div class="typing-container">
+            <div id="typing-indicator" style="display: none;">Suporte está digitando...</div>
+        </div>
+        <div class="input-group">
+            <textarea id="mensagem" class="form-control" placeholder="Digite sua mensagem..." maxlength="500"></textarea>
+            <button id="enviar-btn" class="btn">Enviar</button>
+        </div>
+        <div id="char-counter">0/500</div>
+        <p class="mt-2">Status do Suporte: <span id="status" class="offline">Offline</span></p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js';
+        import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js';
+        import { getDatabase, ref, push, onValue, set, update, get } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js';
+
+        const CONFIG = {
+            FIREBASE: {
+                apiKey: "AIzaSyA1C3iYQe22zhTP5HVj19atOZLROtba3rw",
+                authDomain: "jogo-do-bicho-421ff.firebaseapp.com",
+                databaseURL: "https://jogo-do-bicho-421ff-default-rtdb.firebaseio.com",
+                projectId: "jogo-do-bicho-421ff",
+                storageBucket: "jogo-do-bicho-421ff.firebasestorage.app",
+                messagingSenderId: "1023919123583",
+                appId: "1:1023919123583:web:b6c561fb121fe54f9e234a",
+                measurementId: "G-BPH150V2SG"
+            },
+            GOOGLE_APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyxAbCh1OvSJnWPc6MkrcBH3A7Ppy9KsQ1ovVEoUmKnn8oxjuuxJpDmYVkJQhNPAhb4mw/exec",
+            NOTIFICATION_SOUND: 'notification.mp3',
+            COOLDOWN_MS: 1000,
+            MAX_MESSAGE_LENGTH: 500
+        };
+
+        const app = initializeApp(CONFIG.FIREBASE);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        const elementos = {
+            chat: document.getElementById('chat'),
+            chatLoading: document.getElementById('chat-loading'),
+            mensagemInput: document.getElementById('mensagem'),
+            enviarBtn: document.getElementById('enviar-btn'),
+            charCounter: document.getElementById('char-counter'),
+            typingIndicator: document.getElementById('typing-indicator'),
+            status: document.getElementById('status'),
+            themeToggle: document.getElementById('theme-toggle')
+        };
+
+        const notificationSound = new Audio(CONFIG.NOTIFICATION_SOUND);
+
+        function formatarTimestamp(timestamp) {
+            const data = new Date(timestamp);
+            return `${String(data.getDate()).padStart(2, '0')}/${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()} ${String(data.getHours()).padStart(2, '0')}:${String(data.getMinutes()).padStart(2, '0')}`;
+        }
+
+        function atualizarContador() {
+            elementos.charCounter.textContent = `${elementos.mensagemInput.value.length}/${CONFIG.MAX_MESSAGE_LENGTH}`;
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        function sanitizeInput(text) {
+            return text.replace(/</g, '<').replace(/>/g, '>');
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            const icon = elementos.themeToggle.querySelector('i');
+            icon.classList.toggle('fa-sun', isDark);
+            icon.classList.toggle('fa-moon', !isDark);
+        }
+
+        elementos.themeToggle.addEventListener('click', toggleTheme);
+        if (localStorage.getItem('theme') === 'light') {
+            toggleTheme();
+        } else {
+            const icon = elementos.themeToggle.querySelector('i');
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        }
+
+        let clienteId = localStorage.getItem('clienteId');
+
+        async function enviarMensagem() {
+            const agora = Date.now();
+            if (agora - (window.ultimoEnvio || 0) < CONFIG.COOLDOWN_MS) return;
+            window.ultimoEnvio = agora;
+
+            const texto = sanitizeInput(elementos.mensagemInput.value.trim());
+            if (!texto) return;
+
+            // Limpar o campo imediatamente ao clicar em "Enviar"
+            elementos.mensagemInput.value = '';
+            atualizarContador();
+
+            elementos.enviarBtn.disabled = true;
+            const novaMensagem = { texto, de: 'cliente', timestamp: Date.now(), notified: false };
+            const mensagensRef = ref(db, 'mensagens/' + clienteId);
+            const novaMensagemRef = push(mensagensRef);
+            await set(novaMensagemRef, novaMensagem);
+
+            const statusRef = ref(db, 'status/' + clienteId);
+            const statusSnapshot = await get(statusRef);
+            const currentCount = statusSnapshot.val()?.unreadCount || 0;
+            await update(statusRef, { unreadCount: currentCount + 1, isTyping: false });
+
+            const adminStatusRef = ref(db, 'status/admin');
+            const adminSnapshot = await get(adminStatusRef);
+            const adminStatus = adminSnapshot.val();
+            const notificationSent = localStorage.getItem('notificationSent') === 'true';
+            if (adminStatus && !adminStatus.online && !notificationSent) {
+                const formData = `clienteId=${encodeURIComponent(clienteId)}&mensagem=${encodeURIComponent(texto)}`;
+                fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+                localStorage.setItem('notificationSent', 'true');
+                await update(ref(db, `mensagens/${clienteId}/${novaMensagemRef.key}`), { notified: true });
+            }
+
+            elementos.enviarBtn.disabled = false;
+        }
+
+        function inicializarChat(clienteId) {
+            const mensagensRef = ref(db, 'mensagens/' + clienteId);
+            const statusRef = ref(db, 'status/' + clienteId);
+            const adminStatusRef = ref(db, 'status/admin');
+
+            const debouncedTyping = debounce(() => update(statusRef, { isTyping: false }), 1000);
+            elementos.mensagemInput.addEventListener('input', () => {
+                update(statusRef, { isTyping: true });
+                debouncedTyping();
+                atualizarContador();
+            });
+
+            elementos.enviarBtn.onclick = enviarMensagem;
+
+            elementos.mensagemInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    enviarMensagem();
+                }
+            });
+
+            let ultimaChave = null;
+            let ultimaQuantidadeMensagens = 0;
+            let ultimaOrigem = null;
+            onValue(mensagensRef, (snapshot) => {
+                elementos.chatLoading.style.display = 'none';
+                elementos.chat.style.display = 'block';
+                const mensagens = snapshot.val() || {};
+                const mensagensArray = Object.keys(mensagens)
+                    .map(key => ({ key, ...mensagens[key] }))
+                    .sort((a, b) => a.timestamp - b.timestamp);
+                const quantidadeAtual = mensagensArray.length;
+
+                if (quantidadeAtual > ultimaQuantidadeMensagens && document.visibilityState === 'hidden') {
+                    notificationSound.play().catch(error => console.log("Erro ao tocar som:", error));
+                    let originalTitle = document.title;
+                    let blink = setInterval(() => document.title = document.title === originalTitle ? 'Nova Mensagem!' : originalTitle, 1000);
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'visible') {
+                            clearInterval(blink);
+                            document.title = originalTitle;
+                        }
+                    }, { once: true });
+                }
+                ultimaQuantidadeMensagens = quantidadeAtual;
+
+                if (ultimaChave === null) {
+                    elementos.chat.innerHTML = '';
+                    mensagensArray.forEach(msg => {
+                        const classe = msg.de === 'cliente' ? 'cliente-msg' : 'suporte-msg';
+                        const remetente = msg.de === 'cliente' ? 'Você' : 'Suporte';
+                        const timestampFormatado = formatarTimestamp(msg.timestamp);
+                        const exibirRemetente = ultimaOrigem !== msg.de;
+                        const conteudo = exibirRemetente ? `<b>${remetente}:</b> ${msg.texto}` : msg.texto;
+                        elementos.chat.innerHTML += `<div class="mensagem ${classe}">${conteudo}<span class="timestamp">${timestampFormatado}</span></div>`;
+                        ultimaOrigem = msg.de;
+                    });
+                } else {
+                    const novasMensagens = mensagensArray.filter(msg => msg.key > ultimaChave);
+                    novasMensagens.forEach(msg => {
+                        const classe = msg.de === 'cliente' ? 'cliente-msg' : 'suporte-msg';
+                        const remetente = msg.de === 'cliente' ? 'Você' : 'Suporte';
+                        const timestampFormatado = formatarTimestamp(msg.timestamp);
+                        const exibirRemetente = ultimaOrigem !== msg.de;
+                        const conteudo = exibirRemetente ? `<b>${remetente}:</b> ${msg.texto}` : msg.texto;
+                        const div = document.createElement('div');
+                        div.className = `mensagem ${classe}`;
+                        div.innerHTML = `${conteudo}<span class="timestamp">${timestampFormatado}</span>`;
+                        elementos.chat.appendChild(div);
+                        ultimaOrigem = msg.de;
+                    });
+                }
+                ultimaChave = mensagensArray[mensagensArray.length - 1]?.key || ultimaChave;
+                elementos.chat.scrollTop = elementos.chat.scrollHeight;
+            });
+
+            update(statusRef, { online: true });
+            window.onunload = () => update(statusRef, { online: false, isTyping: false });
+
+            onValue(adminStatusRef, (snapshot) => {
+                const adminData = snapshot.val() || { online: false };
+                elementos.status.textContent = adminData.online ? 'Online' : 'Offline';
+                elementos.status.className = adminData.online ? 'online' : 'offline';
+                elementos.typingIndicator.style.display = (adminData.isTyping || false) ? 'block' : 'none';
+                if (adminData.isTyping) elementos.chat.scrollTop = elementos.chat.scrollHeight;
+                if (adminData.online) localStorage.setItem('notificationSent', 'false');
+            });
+        }
+
+        if (!clienteId) {
+            signInAnonymously(auth).then((user) => {
+                clienteId = user.user.uid;
+                localStorage.setItem('clienteId', clienteId);
+                inicializarChat(clienteId);
+            }).catch((error) => {
+                console.error("Erro na autenticação:", error);
+                alert("Erro ao conectar ao chat: " + error.message);
+            });
+        } else {
+            inicializarChat(clienteId);
+        }
+
+        atualizarContador();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
