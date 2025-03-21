@@ -5,7 +5,7 @@
 .advantages-grid {display: grid;grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));gap: 20px;}
 .advantage-item {background: rgba(255,255,255,0.1);border-radius: 10px;padding: 20px;text-align: center;transition: transform .3s;width: 100%;max-width: 350px;}
 .advantage-item:hover {transform: translateY(-5px);}
-.advantage-item img {width: 34px;height: 32px;margin-bottom: 5px;} /* Substitui .advantage-item i */
+.advantage-item img {width: 34px;height: 34px;margin-bottom: 5px;}
 .advantage-item h3 {font-size: 1.3em;margin-bottom: 10px;color: #ffd700;}
 .benefits {background: rgba(255,255,255,0.05);padding: 40px;border-radius: 15px;margin: 40px 0;}
 .benefits h2 {text-align: center;color: #ffd700;margin-bottom: 20px;}
@@ -56,7 +56,7 @@ footer p {font-size: .9em;color: #ccc;}
 footer a {color: #ffd700;text-decoration: none;}
 footer a:hover {text-decoration: underline;}
 .intro h1 {margin-top: 10px;}
-.hamburger img {width: 34px;height: 32px;vertical-align: middle;} /* Ajuste para o ícone do hamburger */
+.hamburger img {width: 24px;height: 24px;vertical-align: middle;}
 @media (max-width: 768px) {
     .advantages-grid {grid-template-columns: repeat(2, 1fr);gap: 15px;}
     .advantage-item {height: auto;min-width: 0;max-width: none;padding: 15px;}
