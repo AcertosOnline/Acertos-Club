@@ -60,7 +60,7 @@ footer a:hover {text-decoration: underline;}
 @media (max-width: 768px) {
     .advantages-grid {grid-template-columns: repeat(2, 1fr);gap: 15px;}
     .advantage-item {height: auto;min-width: 0;max-width: none;padding: 15px;}
-    .advantage-item img {width: 34px;height: 32px;} /* Mantém o tamanho em mobile */
+    .advantage-item img {width: 34px;height: 34px;} /* Mantém o tamanho em mobile */
     .advantage-item h3 {font-size: 1.2em;}
     .intro h1 {font-size: 1.5em;margin-top: 80px;}
     .advantages, .benefits, .bet-types {padding: 20px;}
