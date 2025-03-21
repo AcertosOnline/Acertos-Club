@@ -1,10 +1,3 @@
-.categories {display: grid;grid-template-columns: repeat(6, 1fr);gap: 5px;margin: 40px 0;width: 100%;}
-.category-card {background: rgba(255,255,255,0.1);border-radius: 15px;padding: 0;text-align: center;transition: transform .3s, box-shadow .3s;height: 100%;display: flex;flex-direction: column;max-width: none;}
-.category-card:hover {transform: translateY(-10px);box-shadow: 0 10px 20px rgba(0,0,0,0.2);}
-.category-card img {width: 100%;height: 200px;object-fit: cover;border-top-left-radius: 15px;border-top-right-radius: 15px;}
-.category-card .content {padding: 5px 10px;flex: 1;display: flex;flex-direction: column;justify-content: center;gap: 3px;}
-.category-card h2 {font-size: 1.1em;margin: 0;color: #ffd700;}
-.category-card p {font-size: 0.75em;margin: 0;}
 .fade-in-section {opacity: 0;transform: translateY(30px);transition: opacity .8s ease-out, transform .8s ease-out;}
 .fade-in-section.visible {opacity: 1;transform: translateY(0);}
 .advantages {background: rgba(255,255,255,0.05);padding: 40px;border-radius: 15px;margin: 40px 0;}
@@ -12,7 +5,7 @@
 .advantages-grid {display: grid;grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));gap: 20px;}
 .advantage-item {background: rgba(255,255,255,0.1);border-radius: 10px;padding: 20px;text-align: center;transition: transform .3s;width: 100%;max-width: 350px;}
 .advantage-item:hover {transform: translateY(-5px);}
-.advantage-item i {font-size: 2.5em;color: #ffd700;margin-bottom: 15px;}
+.advantage-item img {width: 34px;height: 32px;margin-bottom: 5px;} /* Substitui .advantage-item i */
 .advantage-item h3 {font-size: 1.3em;margin-bottom: 10px;color: #ffd700;}
 .benefits {background: rgba(255,255,255,0.05);padding: 40px;border-radius: 15px;margin: 40px 0;}
 .benefits h2 {text-align: center;color: #ffd700;margin-bottom: 20px;}
@@ -34,7 +27,7 @@
 .floating-btn {position: fixed;bottom: 20px;right: 20px;background: #ffd700;color: #1a1a2e;padding: 12px 20px;border-radius: 50px;text-decoration: none;font-weight: bold;box-shadow: 0 5px 15px rgba(255,215,0,0.4);transition: opacity .3s;}
 .floating-btn.hidden {opacity: 0;pointer-events: none;}
 .footer-cta {text-align: center;margin: 40px 0;}
-.footer-banner {width: 100%;max-width: 500px;height: auto;margin: 0 auto 20px;border-radius: 15px;overflow: hidden;}
+.footer-banner {width: 100%;max-width: 400px;height: auto;margin: 0 auto 20px;border-radius: 15px;overflow: hidden;}
 .footer-cta-container {border: 2px solid #ffd700;padding: 20px;border-radius: 15px;}
 .footer-banner-slogan {font-size: 1.8em;color: #fff;margin-bottom: 20px;}
 .footer-btn {display: inline-block;background: #ffd700;color: #1a1a2e;padding: 15px 25px;border-radius: 50px;text-decoration: none;font-weight: bold;transition: transform .3s;}
@@ -63,22 +56,11 @@ footer p {font-size: .9em;color: #ccc;}
 footer a {color: #ffd700;text-decoration: none;}
 footer a:hover {text-decoration: underline;}
 .intro h1 {margin-top: 10px;}
+.hamburger img {width: 34px;height: 32px;vertical-align: middle;} /* Ajuste para o ícone do hamburger */
 @media (max-width: 768px) {
-    .categories {grid-template-columns: repeat(2, 1fr);gap: 10px;}
-    .category-card {max-width: none;height: auto;}
-    .category-card img {height: 120px;width: 100%;object-fit: cover;}
-    .category-card .content {padding: 3px 8px;gap: 2px;}
-    .category-card h2 {font-size: 0.9em;}
-    .category-card p {font-size: 0.65em;}
-    nav {position: fixed;top: 0;left: 0;width: 100%;padding: 15px;}
-    .categories {gap: 15px;}
-    .category-card img {height: auto;aspect-ratio: 1/1;}
-    .category-card {height: auto;min-width: 0;max-width: none;}
-    .category-card h2 {font-size: 1.1em;}
-    .category-card p {font-size: .8em;}
     .advantages-grid {grid-template-columns: repeat(2, 1fr);gap: 15px;}
     .advantage-item {height: auto;min-width: 0;max-width: none;padding: 15px;}
-    .advantage-item i {font-size: 2em;}
+    .advantage-item img {width: 34px;height: 32px;} /* Mantém o tamanho em mobile */
     .advantage-item h3 {font-size: 1.2em;}
     .intro h1 {font-size: 1.5em;margin-top: 80px;}
     .advantages, .benefits, .bet-types {padding: 20px;}
