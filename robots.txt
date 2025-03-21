@@ -6,4 +6,4 @@ Disallow: /checkout/
 Disallow: /login/
 Disallow: /conta/
 
-Sitemap: https://www.acertosonline.com/sitemap.xml
+Sitemap: https://acertosonline.com/sitemap.xml
