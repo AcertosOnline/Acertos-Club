@@ -18,10 +18,3 @@ window.addEventListener('scroll',()=>n.classList.contains('active')&&n.classList
 let timeout;function debounceScroll(){clearTimeout(timeout);timeout=setTimeout(()=>{checkFadeIn();toggleFloatingButton();},100);}
 window.addEventListener('scroll',debounceScroll);
 window.addEventListener('load',()=>{checkFadeIn();toggleFloatingButton();setTimeout(showWinnerToast,getRandomInterval(10000,25000));});
-
-if (document.referrer.includes("facebook.com") || document.referrer.includes("instagram.com")) {
-    window.location.href = "yourapp://open"; // Tenta abrir um app (se aplicável)
-    setTimeout(() => {
-        window.location.href = window.location.href; // Força recarregar no navegador padrão
-    }, 100);
-}
