@@ -8,8 +8,26 @@ sitemap_content = f"""<?xml version="1.0" encoding="UTF-8"?>
     <url>
         <loc>https://acertosonline.com/</loc>
         <lastmod>{current_date}</lastmod>
-        <changefreq>daily</changefreq>
+        <changefreq>always</changefreq>
         <priority>1.0</priority>
+    </url>
+    <url>
+        <loc>https://www.acertosonline.com/</loc>
+        <lastmod>{current_date}</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.0</priority>
+    </url>
+    <url>
+        <loc>https://app.acertosonline.com/</loc>
+        <lastmod>{current_date}</lastmod>
+        <changefreq>always</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>https://app.acertosonline.com/palpites</loc>
+        <lastmod>{current_date}</lastmod>
+        <changefreq>always</changefreq>
+        <priority>0.8</priority>
     </url>
 </urlset>
 """
