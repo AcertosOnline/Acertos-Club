@@ -11,12 +11,6 @@ sitemap_content = f"""<?xml version="1.0" encoding="UTF-8"?>
         <changefreq>always</changefreq>
         <priority>1.0</priority>
     </url>
-    <url>
-        <loc>https://www.acertosonline.com/</loc>
-        <lastmod>{current_date}</lastmod>
-        <changefreq>always</changefreq>
-        <priority>1.0</priority>
-    </url>
 </urlset>
 """
 
