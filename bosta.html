@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Publicação - Meta API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        select, input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #357abd;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+        .success {
+            color: green;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div id="scriptUrl" data-url="https://script.google.com/macros/s/AKfycbxsY8Zfp5VZyEoNDC9eaPT8atWWyidXhPd0PE85UyUnnzJnTVpBiRiDSZ-igLG-Myx2TA/exec" style="display: none;"></div>
+    <div class="container">
+        <h1>Teste de Publicação</h1>
+        <form id="publishForm">
+            <label for="platform">Plataforma</label>
+            <select id="platform" name="platform">
+                <option value="instagram" selected>Instagram</option>
+                <option value="facebook">Facebook</option>
+            </select>
+            <label for="type">Tipo de Publicação</label>
+            <select id="type" name="type">
+                <option value="">Selecione</option>
+                <option value="story">Story</option>
+                <option value="reel">Reel</option>
+                <option value="post" selected>Post</option>
+                <option value="carousel">Carrossel</option>
+                <option value="long_video">Vídeo Longo (Instagram)</option>
+                <option value="text">Texto (Facebook)</option>
+            </select>
+            <label for="fileUrl">URL da Mídia (carrossel: separe por vírgulas)</label>
+            <input type="text" id="fileUrl" name="fileUrl" placeholder="https://example.com/image.jpg">
+            <label for="caption">Legenda (JSON)</label>
+            <textarea id="caption" name="caption" rows="4">{"title":"Publicação de Teste","description":"Esta é uma publicação de teste para a Meta API.","hashtags":"#teste #metaapi","link":""}</textarea>
+            <button type="submit">Publicar</button>
+        </form>
+        <div id="response"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('publishForm');
+        const responseDiv = document.getElementById('response');
+        const scriptUrl = document.getElementById('scriptUrl').dataset.url;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            responseDiv.innerHTML = '<p>Enviando...</p>';
+
+            const platform = document.getElementById('platform').value;
+            const type = document.getElementById('type').value;
+            const fileUrl = document.getElementById('fileUrl').value.trim();
+            const caption = document.getElementById('caption').value.trim();
+
+            // Validação básica
+            if (!platform || !type) {
+                responseDiv.innerHTML = '<p class="error">Preencha plataforma e tipo.</p>';
+                return;
+            }
+            if (type !== 'text' && !fileUrl) {
+                responseDiv.innerHTML = '<p class="error">Insira uma URL válida para a mídia.</p>';
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('platform', platform);
+                formData.append('type', type);
+                if (fileUrl) formData.append('fileUrl', fileUrl);
+                if (caption) formData.append('caption', caption);
+
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    responseDiv.innerHTML = `<p class="success">Sucesso: ${result.mensagem || 'Publicação iniciada!'}</p>`;
+                    if (result.idMidia) {
+                        responseDiv.innerHTML += `<p class="success">ID da Mídia: ${result.idMidia}</p>`;
+                    }
+                } else {
+                    responseDiv.innerHTML = `<p class="error">Erro: ${result.erro || 'Falha na requisição.'} ${result.detalhes || ''}</p>`;
+                }
+            } catch (error) {
+                responseDiv.innerHTML = `<p class="error">Erro: Falha ao conectar com o servidor. Certifique-se de que a extensão CORS Unblock está instalada e ATIVA (https://chrome.google.com/webstore/detail/cors-unblock/lfhmikememgdcahcdlaciloancbhjche). Clique no ícone da extensão (canto superior direito) e ligue o interruptor. Se o problema persistir, tente a extensão Allow CORS (https://chrome.google.com/webstore/detail/allow-cors-access-control/lhobafahddgcelffkeicbaginigeejlf).</p>`;
+                console.error('Erro detalhado:', error);
+            }
+        });
+    </script>
+</body>
+</html>
